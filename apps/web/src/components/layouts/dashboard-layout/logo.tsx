@@ -1,20 +1,21 @@
 import Image from "next/image";
 
 interface LogoProps {
-  variant?: "light" | "dark";
+  theme?: "light" | "dark";
+  className?: string;
 }
 
-/** WareFlow wordmark with icon. Use `light` on dark backgrounds. */
-export function Logo({ variant = "dark" }: LogoProps) {
+/**
+ * WareFlow wordmark.
+ * theme="light" → logo for light backgrounds (dark-coloured text)
+ * theme="dark"  → logo for dark backgrounds (white-coloured text)
+ */
+export function Logo({ theme = "light", className }: LogoProps) {
+  const src = theme === "dark" ? "/logo-dark.png" : "/logo-light.png";
+
   return (
-    <div
-      className={
-        variant === "light"
-          ? "inline-flex items-center rounded-xl bg-white px-4 py-2"
-          : "flex items-center"
-      }
-    >
-      <Image src="/wareflow-logo-full.png" alt="WareFlow" width={180} height={48} priority />
+    <div className={className}>
+      <Image src={src} alt="WareFlow" width={200} height={35} priority />
     </div>
   );
 }

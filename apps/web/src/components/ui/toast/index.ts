@@ -1,2 +1,3 @@
-export { ToastContainer, useToastStore } from "./component";
-export type { ToastProps, ToastVariant, ToastState } from "./types";
+export { WareFlowToast } from "./component";
+export type { WareFlowToastProps } from "./component";
+export type { ToastVariant, ToastOptions } from "./types";

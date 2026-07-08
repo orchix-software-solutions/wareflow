@@ -19,6 +19,7 @@ import { useSidebarStore } from "@/store/use-sidebar-store";
 import { SIDEBAR_CONFIG } from "@/config/nav";
 import { SidebarNavItem } from "./sidebar-nav-item";
 import { SidebarUserProfile } from "./sidebar-user-profile";
+import { Logo } from "./logo";
 import type { SidebarConfig } from "@/types/nav";
 
 const BOTTOM_TAB_ITEMS = [
@@ -40,13 +41,7 @@ export function MobileNav({ config = SIDEBAR_CONFIG }: MobileNavProps) {
   const dragControls = useDragControls();
   const sheetRef = useRef<HTMLDivElement>(null);
 
-  const bottomTabHrefs = new Set<string>(BOTTOM_TAB_ITEMS.map((t) => t.href));
-
-  const sheetGroups = config.groups
-    .map((group) => ({
-      items: group.items.filter((item) => !bottomTabHrefs.has(item.href)),
-    }))
-    .filter((group) => group.items.length > 0);
+  const sheetGroups = config.groups.filter((group) => group.items.length > 0);
 
   const handleCloseSheet = useCallback(() => {
     setMobileSheetOpen(false);
@@ -152,12 +147,7 @@ export function MobileNav({ config = SIDEBAR_CONFIG }: MobileNavProps) {
                     : undefined
                 }
               >
-                <div>
-                  <span className="text-[15px] font-semibold text-sidebar-text">WareFlow</span>
-                  <p className="text-[12px] text-sidebar-text-muted">
-                    Enterprise operations platform
-                  </p>
-                </div>
+                <Logo theme="dark" />
                 <div className="flex items-center gap-1">
                   <button
                     onClick={toggleSheetFullscreen}

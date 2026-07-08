@@ -1,17 +1,7 @@
 export type ToastVariant = "success" | "error" | "warning" | "info";
 
-export interface ToastProps {
-  id: string;
+export interface ToastOptions {
   title: string;
-  description?: string;
-  variant?: ToastVariant;
+  description: string;
   duration?: number;
-  dismissible?: boolean;
-}
-
-export interface ToastState {
-  toasts: ToastProps[];
-  addToast: (toast: Omit<ToastProps, "id">) => void;
-  removeToast: (id: string) => void;
-  clearToasts: () => void;
 }

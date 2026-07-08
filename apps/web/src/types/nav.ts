@@ -1,8 +1,11 @@
 import type { LucideIcon } from "lucide-react";
 
+export type NavChildType = "link" | "action" | "separator";
+
 export interface NavChild {
   label: string;
-  href: string;
+  type?: NavChildType; // default: "link"
+  href?: string; // required for "link", unused for "action"/"separator"
 }
 
 export interface NavItem {
@@ -10,10 +13,10 @@ export interface NavItem {
   href: string;
   icon: LucideIcon;
   children?: NavChild[];
-  group?: string;
 }
 
 export interface NavGroup {
+  label?: string;
   items: NavItem[];
 }
 

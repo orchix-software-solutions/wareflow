@@ -15,7 +15,13 @@ interface ActivityTimelineProps {
 function formatTimestamp(timestamp: string): string {
   const date = new Date(timestamp);
   if (Number.isNaN(date.getTime())) return timestamp;
-  return date.toLocaleString();
+  return date.toLocaleString("en-GB", {
+    day: "2-digit",
+    month: "short",
+    hour: "2-digit",
+    minute: "2-digit",
+    hour12: false,
+  });
 }
 
 /** Vertical timeline of recent activity for a record */
@@ -54,7 +60,7 @@ export function ActivityTimeline({ items, isLoading = false }: ActivityTimelineP
           />
           <div className="flex min-w-0 flex-1 items-start justify-between gap-3">
             <p className="min-w-0 truncate text-[13px] text-slate-900">{item.description}</p>
-            <span className="shrink-0 text-[12px] text-slate-500">
+            <span className="shrink-0 text-[12px] text-slate-500" suppressHydrationWarning>
               {formatTimestamp(item.timestamp)}
             </span>
           </div>

@@ -27,6 +27,8 @@ export interface DataTablePagination {
   total: number;
   onPageChange: (page: number) => void;
   onLimitChange: (limit: number) => void;
+  /** Rows-per-page choices shown in the page-size selector (default [10, 25, 50, 100]) */
+  pageSizeOptions?: number[];
 }
 
 export interface DataTableSorting {
@@ -61,4 +63,12 @@ export interface DataTableProps<T> {
   /** Optional callbacks to apply custom class names or styles to table rows */
   getRowClassName?: (row: T, index: number) => string;
   getRowStyle?: (row: T, index: number) => React.CSSProperties;
+  /** Row density — "compact" gives 40px rows for dense enterprise tables (default "comfortable" = 56px) */
+  density?: "comfortable" | "compact";
+  /** Renders a leading checkbox column; pair with selectedRowIds/onSelectedRowIdsChange */
+  selectable?: boolean;
+  selectedRowIds?: string[];
+  onSelectedRowIdsChange?: (ids: string[]) => void;
+  /** When set, wraps the desktop table body in a fixed-height scroll area with a sticky header and a pagination bar pinned below it */
+  bodyHeight?: string;
 }

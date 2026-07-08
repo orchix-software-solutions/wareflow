@@ -13,12 +13,12 @@ export function AuthLayout({ children }: AuthLayoutProps) {
         <div className="flex w-full flex-col overflow-y-auto bg-white lg:w-1/2">
           {/* Logo pinned top on desktop */}
           <div className="hidden px-8 pt-10 lg:block">
-            <Logo variant="dark" />
+            <Logo theme="light" />
           </div>
 
           {/* Mobile logo */}
           <div className="flex justify-center px-6 pt-10 lg:hidden">
-            <Logo variant="dark" />
+            <Logo theme="light" />
           </div>
 
           <div className="flex w-full grow flex-col items-center px-6 pb-16 pt-8 lg:min-h-0 lg:px-8 lg:py-8">

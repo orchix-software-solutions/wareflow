@@ -9,9 +9,10 @@ export function Providers({ children }: { children: React.ReactNode }) {
       {children}
       <Toaster
         position="top-right"
-        richColors
-        closeButton
-        toastOptions={{ style: { fontFamily: "var(--font-bricolage)" } }}
+        gap={8}
+        offset={24}
+        visibleToasts={5}
+        style={{ fontFamily: "var(--font-bricolage)" }}
       />
     </QueryProvider>
   );

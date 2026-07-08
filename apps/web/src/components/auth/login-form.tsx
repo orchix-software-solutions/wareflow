@@ -1,6 +1,7 @@
 "use client";
 
 import { useState } from "react";
+import { useRouter } from "next/navigation";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { z } from "zod";
@@ -8,7 +9,10 @@ import { Eye, EyeOff, Lock, Mail, User } from "lucide-react";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 import { Checkbox } from "@/components/ui/checkbox";
-import { cn } from "@/lib/utils";
+import { SegmentedTabs } from "@/components/ui/segmented-tabs";
+import { toast } from "@/lib/toast";
+import { useLogin } from "@/hooks/auth";
+import { ApiError } from "@/services/api-client";
 
 // ── Schemas ────────────────────────────────────────────────
 const emailSchema = z.object({
@@ -17,24 +21,26 @@ const emailSchema = z.object({
 });
 
 const userIdSchema = z.object({
-  userId: z.string().min(1, "User ID is required"),
+  username: z.string().min(1, "Username is required"),
   password: z.string().min(1, "Password is required"),
 });
 
 type EmailValues = z.infer<typeof emailSchema>;
 type UserIdValues = z.infer<typeof userIdSchema>;
 
-type Tab = "email" | "userId";
+type Tab = "email" | "username";
 
 const TABS: { id: Tab; label: string }[] = [
-  { id: "userId", label: "USER ID" },
+  { id: "username", label: "USERNAME" },
   { id: "email", label: "EMAIL" },
 ];
 
 // ── Sub-forms ──────────────────────────────────────────────
 function EmailForm() {
+  const router = useRouter();
   const [showPassword, setShowPassword] = useState(false);
   const [rememberMe, setRememberMe] = useState(false);
+  const { mutateAsync: login } = useLogin();
   const {
     register,
     handleSubmit,
@@ -44,8 +50,18 @@ function EmailForm() {
     defaultValues: { email: "", password: "" },
   });
 
-  const onSubmit = (values: EmailValues) => {
-    console.log("email login", values);
+  const onSubmit = async (values: EmailValues) => {
+    try {
+      await login({ identifier: values.email, password: values.password });
+      toast.success({
+        title: "Welcome Back",
+        description: "You have successfully signed in to WareFlow.",
+      });
+      router.push("/dashboard");
+    } catch (error) {
+      const message = error instanceof ApiError ? error.message : "Something went wrong";
+      toast.error({ title: "Sign in failed", description: message });
+    }
   };
 
   return (
@@ -87,6 +103,7 @@ function EmailForm() {
         <button
           type="button"
           className="text-[13px] font-medium text-brand-600 hover:text-brand-700"
+          onClick={() => router.push("/forgot-password")}
         >
           Forgot password?
         </button>
@@ -99,33 +116,45 @@ function EmailForm() {
   );
 }
 
-function UserIdForm() {
+function UsernameForm() {
+  const router = useRouter();
   const [showPassword, setShowPassword] = useState(false);
   const [rememberMe, setRememberMe] = useState(false);
+  const { mutateAsync: login } = useLogin();
   const {
     register,
     handleSubmit,
     formState: { errors, isSubmitting },
   } = useForm<UserIdValues>({
     resolver: zodResolver(userIdSchema),
-    defaultValues: { userId: "", password: "" },
+    defaultValues: { username: "", password: "" },
   });
 
-  const onSubmit = (values: UserIdValues) => {
-    console.log("userId login", values);
+  const onSubmit = async (values: UserIdValues) => {
+    try {
+      await login({ identifier: values.username, password: values.password });
+      toast.success({
+        title: "Welcome Back",
+        description: "You have successfully signed in to WareFlow.",
+      });
+      router.push("/dashboard");
+    } catch (error) {
+      const message = error instanceof ApiError ? error.message : "Something went wrong";
+      toast.error({ title: "Sign in failed", description: message });
+    }
   };
 
   return (
     <form onSubmit={handleSubmit(onSubmit)} className="flex flex-col gap-5">
       <Input
-        label="User ID"
+        label="Username"
         type="text"
-        placeholder="Enter your user ID"
+        placeholder="Enter your username"
         autoComplete="username"
         leftIcon={<User className="h-4 w-4" />}
-        error={errors.userId?.message}
+        error={errors.username?.message}
         required
-        {...register("userId")}
+        {...register("username")}
       />
 
       <Input
@@ -154,6 +183,7 @@ function UserIdForm() {
         <button
           type="button"
           className="text-[13px] font-medium text-brand-600 hover:text-brand-700"
+          onClick={() => router.push("/forgot-password")}
         >
           Forgot password?
         </button>
@@ -168,7 +198,7 @@ function UserIdForm() {
 
 // ── Form ───────────────────────────────────────────────────
 export function LoginForm() {
-  const [activeTab, setActiveTab] = useState<Tab>("userId");
+  const [activeTab, setActiveTab] = useState<Tab>("username");
 
   return (
     <div className="w-full">
@@ -181,26 +211,10 @@ export function LoginForm() {
       </div>
 
       {/* Tabs */}
-      <div className="mb-6 flex rounded-xl bg-slate-100 p-1">
-        {TABS.map((tab) => (
-          <button
-            key={tab.id}
-            type="button"
-            onClick={() => setActiveTab(tab.id)}
-            className={cn(
-              "flex-1 rounded-lg py-2 text-[13px] font-medium transition-all duration-200",
-              activeTab === tab.id
-                ? "bg-white text-brand-900 shadow-sm"
-                : "text-slate-400 hover:text-slate-600",
-            )}
-          >
-            {tab.label}
-          </button>
-        ))}
-      </div>
+      <SegmentedTabs tabs={TABS} activeTab={activeTab} onChange={setActiveTab} className="mb-6" />
 
       {/* Form */}
-      <div key={activeTab}>{activeTab === "email" ? <EmailForm /> : <UserIdForm />}</div>
+      <div key={activeTab}>{activeTab === "email" ? <EmailForm /> : <UsernameForm />}</div>
     </div>
   );
 }

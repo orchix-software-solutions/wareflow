@@ -2,7 +2,7 @@
 
 import { Sidebar } from "./sidebar";
 import { MobileNav } from "./mobile-nav";
-import { PageHeader } from "@/components/common/page-header";
+import { DashboardHeader } from "./header";
 
 interface DashboardLayoutProps {
   children: React.ReactNode;
@@ -14,7 +14,7 @@ export function DashboardLayout({ children }: DashboardLayoutProps) {
     <div className="flex h-screen bg-white">
       <Sidebar />
       <div className="flex flex-1 flex-col overflow-hidden">
-        <PageHeader />
+        <DashboardHeader />
         <main className="flex flex-1 flex-col overflow-y-auto px-4 py-6 pb-36 sm:px-6 lg:pb-6">
           {children}
         </main>

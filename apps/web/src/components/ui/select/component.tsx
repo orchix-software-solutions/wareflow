@@ -37,14 +37,14 @@ export function Select({
           aria-invalid={!!error}
           aria-describedby={errorId ?? hintId}
           className={cn(
-            "flex h-11 w-full items-center justify-between rounded-[10px] border border-[#E2E8F0] bg-white px-3.5 text-[14px] text-[#0F172A] transition-all duration-150 hover:border-[#CBD5E1] focus:border-[#2563EB] focus:outline-none focus:ring-[3px] focus:ring-[rgba(37,99,235,0.12)] disabled:cursor-not-allowed disabled:bg-[#F8FAFC] disabled:opacity-60 data-[placeholder]:text-[#94A3B8]",
+            "group flex h-11 w-full items-center justify-between rounded-[10px] border border-[#E2E8F0] bg-white px-3.5 text-[14px] text-[#0F172A] transition-all duration-150 hover:border-[#CBD5E1] focus:border-[#2563EB] focus:outline-none focus:ring-[3px] focus:ring-[rgba(37,99,235,0.12)] disabled:cursor-not-allowed disabled:bg-[#F8FAFC] disabled:opacity-60 data-[placeholder]:text-[#94A3B8]",
             error && "border-[#DC3545] focus:border-[#DC3545] focus:ring-[rgba(220,53,69,0.1)]",
             className,
           )}
         >
           <SelectPrimitive.Value placeholder={placeholder} />
           <SelectPrimitive.Icon asChild>
-            <ChevronDown className="h-4 w-4 shrink-0 text-[#64748B] transition-transform duration-200 data-[state=open]:rotate-180" />
+            <ChevronDown className="h-4 w-4 shrink-0 text-[#64748B] transition-transform duration-200 group-data-[state=open]:rotate-180" />
           </SelectPrimitive.Icon>
         </SelectPrimitive.Trigger>
         <SelectPrimitive.Portal>

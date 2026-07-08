@@ -11,3 +11,4 @@ dist/
 # Uploaded media (local storage driver)
 uploads/
 !uploads/.gitkeep
+specs

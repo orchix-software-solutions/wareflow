@@ -1,6 +1,7 @@
 import { connectDatabase } from "@wareflow/db";
 import { env } from "@/config/env";
 import { buildApp } from "./app";
+import { runSeedManager } from "./seeders/seed-manager";
 import type { FastifyInstance } from "fastify";
 
 /**
@@ -12,6 +13,12 @@ async function bootstrapDataLayer(app: FastifyInstance): Promise<void> {
   try {
     await connectDatabase();
     app.log.info("Data layer ready — database connected");
+
+    try {
+      await runSeedManager(app.log);
+    } catch (err) {
+      app.log.error({ err }, "Startup seeding failed — server continues running");
+    }
   } catch (err) {
     app.log.error(
       { err },

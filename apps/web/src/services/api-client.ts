@@ -1,6 +1,7 @@
 import axios, { AxiosError, type AxiosInstance } from "axios";
+import { useAuthStore } from "@/store/use-auth-store";
 
-const API_BASE_URL = process.env.NEXT_PUBLIC_API_URL || "http://localhost:3001/api/v1";
+const API_BASE_URL = process.env.NEXT_PUBLIC_API_URL || "http://localhost:3001/api";
 
 interface ApiErrorResponse {
   success: false;
@@ -61,6 +62,14 @@ class ApiClient {
       baseURL: API_BASE_URL,
       withCredentials: true,
       headers: { "Content-Type": "application/json" },
+    });
+
+    this.instance.interceptors.request.use((config) => {
+      const accessToken = useAuthStore.getState().accessToken;
+      if (accessToken) {
+        config.headers.Authorization = `Bearer ${accessToken}`;
+      }
+      return config;
     });
   }
 

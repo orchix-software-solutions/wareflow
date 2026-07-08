@@ -18,7 +18,29 @@ import { useMediaQuery } from "@/hooks/use-media-query";
 import { Input } from "@/components/ui/input";
 import { Tooltip } from "@/components/ui/tooltip";
 import { Skeleton } from "@/components/ui/skeleton";
-import type { DataTableProps, Column, Action } from "./data-table.types";
+import { Checkbox } from "@/components/ui/checkbox";
+import { Select } from "@/components/ui/select";
+import type { DataTableProps, Column, Action, DataTablePagination } from "./data-table.types";
+
+const DEFAULT_PAGE_SIZE_OPTIONS = [10, 25, 50, 100];
+
+function PageSizeSelect({ pagination }: { pagination: DataTablePagination }) {
+  const options = (pagination.pageSizeOptions ?? DEFAULT_PAGE_SIZE_OPTIONS).map((n) => ({
+    label: `${n} / page`,
+    value: String(n),
+  }));
+  return (
+    <div className="flex items-center gap-2">
+      <span className="text-[13px] text-[#64748B]">Rows per page</span>
+      <Select
+        options={options}
+        value={String(pagination.limit)}
+        onValueChange={(v) => pagination.onLimitChange(Number(v))}
+        className="h-8 w-[104px] text-[13px]"
+      />
+    </div>
+  );
+}
 
 function fmtDateRangeBar(from: Date, to: Date | null): string {
   const M = ["Jan", "Feb", "Mar", "Apr", "May", "Jun", "Jul", "Aug", "Sep", "Oct", "Nov", "Dec"];
@@ -45,8 +67,36 @@ export function DataTable<T>({
   activeFilters,
   getRowClassName,
   getRowStyle,
+  density = "comfortable",
+  selectable,
+  selectedRowIds,
+  onSelectedRowIdsChange,
+  bodyHeight,
 }: DataTableProps<T>) {
   const isDesktop = useMediaQuery("(min-width: 768px)");
+  const rowHeightClass = density === "compact" ? "h-10" : "h-14";
+  const selectedIds = selectedRowIds ?? [];
+  const allOnPageSelected =
+    !!selectable && data.length > 0 && data.every((row) => selectedIds.includes(getRowId(row)));
+
+  const toggleAll = () => {
+    if (!onSelectedRowIdsChange) return;
+    const pageIds = data.map((row) => getRowId(row));
+    if (allOnPageSelected) {
+      onSelectedRowIdsChange(selectedIds.filter((id) => !pageIds.includes(id)));
+    } else {
+      onSelectedRowIdsChange(Array.from(new Set([...selectedIds, ...pageIds])));
+    }
+  };
+
+  const toggleRow = (rowId: string) => {
+    if (!onSelectedRowIdsChange) return;
+    onSelectedRowIdsChange(
+      selectedIds.includes(rowId)
+        ? selectedIds.filter((id) => id !== rowId)
+        : [...selectedIds, rowId],
+    );
+  };
 
   // Local input state so keystrokes are instant — onSearch (→ URL push) fires after debounce
   const [inputValue, setInputValue] = useState(searchValue ?? "");
@@ -103,9 +153,12 @@ export function DataTable<T>({
 
   const paginationBlock = pagination && data.length > 0 && (
     <div className="flex flex-col gap-3 border-t border-[#F1F5F9] px-4 py-3 sm:flex-row sm:items-center sm:justify-between">
-      <p className="text-[13px] text-[#64748B]">
-        Showing {paginationInfo!.start}-{paginationInfo!.end} of {paginationInfo!.total} results
-      </p>
+      <div className="flex flex-col gap-2 sm:flex-row sm:items-center sm:gap-4">
+        <p className="text-[13px] text-[#64748B]">
+          Showing {paginationInfo!.start}-{paginationInfo!.end} of {paginationInfo!.total} results
+        </p>
+        <PageSizeSelect pagination={pagination} />
+      </div>
       <div className="flex items-center gap-1">
         <button
           disabled={pagination.page <= 1}
@@ -232,7 +285,11 @@ export function DataTable<T>({
 
       {isLoading ? (
         <div className="overflow-hidden rounded-xl border border-[#F1F5F9] bg-white">
-          <LoadingSkeleton columns={columns} isDesktop={isDesktop} />
+          <LoadingSkeleton
+            columns={columns}
+            isDesktop={isDesktop}
+            rowHeightClass={rowHeightClass}
+          />
         </div>
       ) : data.length === 0 ? (
         <div className="flex min-h-[300px] items-center justify-center rounded-xl border border-[#F1F5F9] bg-white p-6">
@@ -240,10 +297,18 @@ export function DataTable<T>({
         </div>
       ) : isDesktop ? (
         <div className="overflow-hidden rounded-xl border border-[#F1F5F9] bg-white">
-          <div className="overflow-x-auto">
+          <div
+            className={cn("overflow-x-auto", bodyHeight && "overflow-y-auto")}
+            style={bodyHeight ? { maxHeight: bodyHeight } : undefined}
+          >
             <table className="w-full">
-              <thead>
+              <thead className={cn(bodyHeight && "sticky top-0 z-20")}>
                 <tr className="bg-[#F8FAFC]">
+                  {selectable && (
+                    <th className="h-11 w-11 bg-[#F8FAFC] px-4">
+                      <Checkbox checked={allOnPageSelected} onChange={toggleAll} />
+                    </th>
+                  )}
                   {columns.map((col) => (
                     <th
                       key={col.id}
@@ -303,11 +368,20 @@ export function DataTable<T>({
                     transition={{ duration: 0.15, delay: i * 0.02 }}
                     style={getRowStyle?.(row, i)}
                     className={cn(
-                      "group h-14 border-t border-[#F1F5F9] transition-colors duration-100 hover:bg-[#F8FAFC]",
+                      "group border-t border-[#F1F5F9] transition-colors duration-100 hover:bg-[#F8FAFC]",
+                      rowHeightClass,
                       i % 2 === 1 && "bg-[#FFFFFF]",
                       getRowClassName?.(row, i),
                     )}
                   >
+                    {selectable && (
+                      <td className="w-11 px-4">
+                        <Checkbox
+                          checked={selectedIds.includes(getRowId(row))}
+                          onChange={() => toggleRow(getRowId(row))}
+                        />
+                      </td>
+                    )}
                     {columns.map((col) => (
                       <td
                         key={col.id}
@@ -360,6 +434,9 @@ export function DataTable<T>({
                 Showing {paginationInfo!.start}-{paginationInfo!.end} of {paginationInfo!.total}{" "}
                 results
               </p>
+              <div className="mt-2">
+                <PageSizeSelect pagination={pagination} />
+              </div>
               <div className="mt-2 flex items-center gap-1">
                 <button
                   disabled={pagination.page <= 1}
@@ -514,7 +591,15 @@ function MobileCardList<T>({
   );
 }
 
-function LoadingSkeleton<T>({ columns, isDesktop }: { columns: Column<T>[]; isDesktop: boolean }) {
+function LoadingSkeleton<T>({
+  columns,
+  isDesktop,
+  rowHeightClass = "h-14",
+}: {
+  columns: Column<T>[];
+  isDesktop: boolean;
+  rowHeightClass?: string;
+}) {
   if (!isDesktop) {
     return (
       <div className="space-y-3">
@@ -545,7 +630,10 @@ function LoadingSkeleton<T>({ columns, isDesktop }: { columns: Column<T>[]; isDe
         ))}
       </div>
       {Array.from({ length: 5 }).map((_, i) => (
-        <div key={i} className="flex h-14 items-center gap-4 border-t border-[#F1F5F9] px-4">
+        <div
+          key={i}
+          className={cn("flex items-center gap-4 border-t border-[#F1F5F9] px-4", rowHeightClass)}
+        >
           {columns.map((col) => (
             <Skeleton key={col.id} className="h-4" style={{ width: col.width ?? "100px" }} />
           ))}

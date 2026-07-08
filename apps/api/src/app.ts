@@ -11,6 +11,7 @@ import {
   errorHandlerPlugin,
 } from "@/plugins";
 import { healthRoute } from "@/routes/health.route";
+import { authRoutes } from "@/modules/auth/auth.route";
 
 export async function buildApp() {
   const isDev = env.NODE_ENV === "development";
@@ -44,6 +45,7 @@ export async function buildApp() {
   await app.register(errorHandlerPlugin);
 
   await app.register(healthRoute);
+  await app.register(authRoutes);
 
   return app;
 }

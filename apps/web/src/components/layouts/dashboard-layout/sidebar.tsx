@@ -27,7 +27,7 @@ export function Sidebar({ config = SIDEBAR_CONFIG }: SidebarProps) {
       <div className="flex h-[80px] shrink-0 items-center justify-between border-b border-sidebar-border px-4">
         {!isCollapsed && (
           <div className="flex flex-1 items-center pl-2">
-            <Logo variant="light" />
+            <Logo theme="dark" />
           </div>
         )}
         <Tooltip content={isCollapsed ? "Expand sidebar" : "Collapse sidebar"} side="right">
