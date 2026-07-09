@@ -3,3 +3,4 @@ export * from "./roles";
 export * from "./users";
 export * from "./seed-tracker";
 export * from "./otps";
+export * from "./application-assets";

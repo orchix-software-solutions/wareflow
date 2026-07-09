@@ -1,10 +1,12 @@
 import type { Role } from "@wareflow/db";
 import { findRoleByName } from "@/modules/roles/roles.repository";
 import { isModuleSeeded, markModuleSeeded } from "@/modules/seed-tracker/seed-tracker.repository";
+import { seedBranding } from "./branding.seeder";
 import { seedOwnerRole, seedOwnerUser } from "./owner.seeder";
 
 interface SeedLogger {
   info: (obj: unknown, msg?: string) => void;
+  warn: (obj: unknown, msg?: string) => void;
 }
 
 /**
@@ -33,5 +35,17 @@ export async function runSeedManager(log: SeedLogger): Promise<void> {
     log.info("Seeded owner_user");
   } else {
     log.info("Skipped owner_user seed — already seeded");
+  }
+
+  if (!(await isModuleSeeded("branding"))) {
+    const allSucceeded = await seedBranding(log);
+    if (allSucceeded) {
+      await markModuleSeeded("branding");
+      log.info("Seeded branding");
+    } else {
+      log.warn("Branding seed incomplete — will retry on next startup");
+    }
+  } else {
+    log.info("Skipped branding seed — already seeded");
   }
 }

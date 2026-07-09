@@ -108,6 +108,25 @@ class ApiClient {
       throw toApiError(error);
     }
   }
+
+  /**
+   * PUT with a native FormData body. Do not set Content-Type manually —
+   * axios detects FormData and generates the correct multipart boundary itself.
+   */
+  async putForm<T>(endpoint: string, formData: FormData): Promise<T> {
+    try {
+      // Delete the instance's default `application/json` content-type so the
+      // browser sets `multipart/form-data` with the correct boundary itself.
+      // Without this the JSON default leaks through and the API rejects the
+      // upload with "the request is not multipart".
+      const response = await this.instance.put(endpoint, formData, {
+        headers: { "Content-Type": null },
+      });
+      return unwrap<T>(response.data);
+    } catch (error) {
+      throw toApiError(error);
+    }
+  }
 }
 
 export const apiClient = new ApiClient();

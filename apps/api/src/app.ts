@@ -5,6 +5,7 @@ import {
   requestContextPlugin,
   helmetPlugin,
   corsPlugin,
+  multipartPlugin,
   compressionPlugin,
   rateLimitPlugin,
   swaggerPlugin,
@@ -12,6 +13,7 @@ import {
 } from "@/plugins";
 import { healthRoute } from "@/routes/health.route";
 import { authRoutes } from "@/modules/auth/auth.route";
+import { brandingRoutes } from "@/modules/branding/branding.route";
 
 export async function buildApp() {
   const isDev = env.NODE_ENV === "development";
@@ -39,6 +41,7 @@ export async function buildApp() {
   await app.register(helmetPlugin);
   await app.register(corsPlugin);
   await app.register(cookie);
+  await app.register(multipartPlugin);
   await app.register(compressionPlugin);
   await app.register(rateLimitPlugin);
   await app.register(swaggerPlugin);
@@ -46,6 +49,7 @@ export async function buildApp() {
 
   await app.register(healthRoute);
   await app.register(authRoutes);
+  await app.register(brandingRoutes);
 
   return app;
 }

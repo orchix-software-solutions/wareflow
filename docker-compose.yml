@@ -36,6 +36,27 @@ services:
     networks:
       - wareflow
 
+  minio:
+    image: minio/minio:latest
+    container_name: wareflow-minio
+    restart: unless-stopped
+    command: server /data --console-address ":9001"
+    environment:
+      MINIO_ROOT_USER: ${MINIO_ACCESS_KEY:-wareflow}
+      MINIO_ROOT_PASSWORD: ${MINIO_SECRET_KEY:-wareflow123}
+    ports:
+      - "${MINIO_PORT:-9000}:9000"
+      - "${MINIO_CONSOLE_PORT:-9001}:9001"
+    volumes:
+      - minio_data:/data
+    healthcheck:
+      test: ["CMD", "mc", "ready", "local"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+    networks:
+      - wareflow
+
   api:
     build:
       context: .
@@ -47,12 +68,21 @@ services:
         condition: service_healthy
       redis:
         condition: service_healthy
+      minio:
+        condition: service_healthy
     environment:
       NODE_ENV: ${NODE_ENV:-production}
       PORT: ${API_PORT:-3001}
       DATABASE_URL: postgresql://${POSTGRES_USER:-wareflow}:${POSTGRES_PASSWORD:-wareflow}@postgres:5432/${POSTGRES_DB:-wareflow}
       REDIS_URL: redis://redis:6379
       ALLOWED_ORIGINS: ${ALLOWED_ORIGINS:-http://localhost:3000}
+      MINIO_ENDPOINT: minio
+      MINIO_PORT: 9000
+      MINIO_ACCESS_KEY: ${MINIO_ACCESS_KEY:-wareflow}
+      MINIO_SECRET_KEY: ${MINIO_SECRET_KEY:-wareflow123}
+      MINIO_USE_SSL: "false"
+      MINIO_BUCKET: ${MINIO_BUCKET:-wareflow-assets}
+      MINIO_PUBLIC_URL: ${MINIO_PUBLIC_URL:-http://localhost:9000}
     ports:
       - "${API_PORT:-3001}:3001"
     networks:
@@ -81,6 +111,7 @@ services:
 volumes:
   postgres_data:
   redis_data:
+  minio_data:
 
 networks:
   wareflow:

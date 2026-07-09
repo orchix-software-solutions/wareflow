@@ -162,15 +162,6 @@ export function FileUpload({
                   {fileSize && <p className="text-[12px] text-[#64748B]">{fileSize}</p>}
                 </div>
               )}
-              {!fileName && previewUrl && (
-                <button
-                  type="button"
-                  onClick={handleRemove}
-                  className="text-[12px] text-[#2563EB] underline-offset-2 hover:underline"
-                >
-                  Remove
-                </button>
-              )}
             </motion.div>
           ) : (
             <motion.div
